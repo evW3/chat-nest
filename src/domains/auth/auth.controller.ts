@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UsePipes } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpException, HttpStatus, Post, UsePipes } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { BcryptService } from './bcrypt.service';
@@ -29,5 +29,20 @@ export class AuthController {
     const token = this.tokenService.createToken(newUserEntity.id);
 
     return { token };
+  }
+
+  @Post('/sign-in')
+  @HttpCode(HttpStatus.OK)
+  async signIn(@Body() userDto: AuthDto) {
+    const userEntity = await this.usersService.getUserByEmail(userDto.email);
+    const encryptedPassword = await this.bcryptService.encryptBySalt(userDto.password, userEntity.password_salt);
+    const isUserValid = userEntity.password === encryptedPassword;
+
+    if(isUserValid) {
+      const token = this.tokenService.createToken(userEntity.id);
+      return { token };
+    } else {
+      throw new HttpException('Email or password isn`t correct', HttpStatus.BAD_REQUEST);
+    }
   }
 }

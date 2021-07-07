@@ -6,6 +6,8 @@ import { AuthService } from './auth.service';
 import { BcryptService } from './bcrypt.service';
 import { TokenService } from './token.service';
 import { UsersModule } from '../users/users.module';
+import { UniqueEmailMiddleware } from '../../middlewares/uniqueEmail.middleware';
+import { IsExistsEmailMiddleware } from '../../middlewares/isExistsEmail.middleware';
 
 @Module({
   imports: [
@@ -19,7 +21,8 @@ import { UsersModule } from '../users/users.module';
     UsersModule
   ],
   providers: [AuthService, BcryptService, TokenService],
-  controllers: [AuthController]
+  controllers: [AuthController],
+  exports: [TokenService]
 })
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

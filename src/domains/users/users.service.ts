@@ -10,4 +10,13 @@ export class UsersService {
   async saveUser(user: Users): Promise<Users> {
     return await this.usersRepository.save(user);
   }
+
+  async isExistsEmail(email: string): Promise<boolean> {
+    const count = await this.usersRepository.count({ where: { email } });
+    return count === 1;
+  }
+
+  async getUserByEmail(email: string): Promise<Users> {
+    return await this.usersRepository.findOne({ where: { email } });
+  }
 }

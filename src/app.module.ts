@@ -5,6 +5,7 @@ import { AuthModule } from './domains/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { Users } from './domains/users/users.model';
+import { ChatModule } from './domains/chat/chat.module';
 
 @Module({
   imports: [
@@ -30,7 +31,8 @@ import { Users } from './domains/users/users.model';
       }
     }),
     AuthModule,
-    UsersModule
+    UsersModule,
+    ChatModule
   ],
   controllers: [],
   providers: [],
