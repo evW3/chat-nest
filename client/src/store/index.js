@@ -1,4 +1,4 @@
 import { createStore } from 'vuex';
-import admin from "./admin";
+import user from "./user";
 
-export const store = createStore({ modules: { admin } });
+export const store = createStore({ modules: { user } });

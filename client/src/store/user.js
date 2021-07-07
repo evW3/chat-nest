@@ -2,11 +2,11 @@ import { post } from 'axios'
 import { API_URL } from  "@/constants"
 
 export default {
-  state: { admin: {} },
-  getters: { admin: s => s.admin },
+  state: { user: {} },
+  getters: { user: s => s.user },
   mutations: {
-    setAdmin(state, token) {
-      state.admin = { token };
+    setUserToken(state, token) {
+      state.user = { token };
     }
   },
   actions: {
@@ -16,10 +16,19 @@ export default {
         const token = (await post(`${ API_URL }/auth/sign-in`, authDto)).data.token;
         localStorage.setItem('token', token);
         console.log(token);
-        await commit('setAdmin', token);
+        commit('setUserToken', token);
       } catch (e) {
-        await commit('setAdmin', null);
+        await commit('setUserToken', null);
         console.log(`[VUEX ERROR]: fetchAdmin [${ e }]`);
+      }
+    },
+
+    fetchAdmin({ commit }) {
+      try {
+        const token = localStorage.getItem('token') || null;
+        commit('setUserToken', token);
+      } catch (e) {
+        console.log(e);
       }
     }
   }
