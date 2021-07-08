@@ -1,17 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { GetTokensDto } from './dto/getTokens.dto';
 import * as querystring from 'querystring';
 import axios from 'axios';
+import { GetGoogleTokensDto } from './dto/getGoogleTokens.dto';
+import { GetFacebookTokensDto } from './dto/getFacebookTokens.dto';
+import { API_URL } from '../../constants';
 
 @Injectable()
 export class AuthService {
-  getTokens(getTokensDto: GetTokensDto): Promise<GetTokensInterface> {
+  getGoogleTokens(getGoogleTokensDto: GetGoogleTokensDto): Promise<GetTokensInterface> {
     const url = "https://oauth2.googleapis.com/token";
     const values = {
-      code: getTokensDto.code,
-      client_id: getTokensDto.clientId,
-      client_secret: getTokensDto.clientSecret,
-      redirect_uri: getTokensDto.redirectUri,
+      code: getGoogleTokensDto.code,
+      client_id: getGoogleTokensDto.clientId,
+      client_secret: getGoogleTokensDto.clientSecret,
+      redirect_uri: getGoogleTokensDto.redirectUri,
       grant_type: "authorization_code",
     };
 
@@ -25,6 +27,22 @@ export class AuthService {
       .catch((error) => {
         console.error(`Failed to fetch auth tokens`);
         throw new Error(error.message);
+      });
+  }
+  getFacebookTokens(getFacebookTokensDto: GetFacebookTokensDto): Promise<GetFacebookTokensInterface> {
+    const rootUrl = 'https://graph.facebook.com/oauth/access_token';
+    const options = {
+      redirect_uri: getFacebookTokensDto.redirectUri,
+      client_id: getFacebookTokensDto.clientId,
+      client_secret: getFacebookTokensDto.clientSecret,
+      code: getFacebookTokensDto.code
+    };
+    return axios
+      .get(`${rootUrl}?${querystring.stringify(options)}`)
+      .then((res) => res.data)
+      .catch((error) => {
+        console.error(`Failed to fetch auth tokens`);
+        throw new Error(error.message)
       });
   }
 }

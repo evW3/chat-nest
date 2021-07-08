@@ -11,7 +11,9 @@
     <button type="submit">Войти</button>
   </form>
   <br>
-  <a :href="googleAuthURL">Войти с google</a>
+  <a :href="googleAuthURL">Войти с Google</a>
+  <br>
+  <a :href="facebookURL">Войти с Facebook</a>
   <br>
   <router-link to="/sign-up">Нет аккаунта?</router-link>
 </template>
@@ -26,7 +28,9 @@
       email: null,
       password: null,
       googleAuthURL: null,
-      clientGoogleId: '440399066496-073ba9nn6cscov1g2bivm4oc0po3v5ml.apps.googleusercontent.com'
+      facebookURL: null,
+      clientGoogleId: '440399066496-073ba9nn6cscov1g2bivm4oc0po3v5ml.apps.googleusercontent.com',
+      clientFacebookId: '340769064208266'
     }),
     methods: {
       async onSubmit() {
@@ -59,10 +63,21 @@
           ].join(" "),
         };
         return `${rootUrl}?${querystring.stringify(options)}`;
+      },
+
+      getFacebookURL() {
+        const rootUrl = 'https://www.facebook.com/dialog/oauth';
+        const options = {
+          redirect_uri: `${API_URL}/auth/facebook-sing-up`,
+          client_id: this.clientFacebookId,
+          response_type: "code"
+        };
+        return `${rootUrl}?${querystring.stringify(options)}`;
       }
     },
     beforeMount() {
       this.googleAuthURL = this.getGoogleURL();
+      this.facebookURL = this.getFacebookURL();
     }
   };
 </script>

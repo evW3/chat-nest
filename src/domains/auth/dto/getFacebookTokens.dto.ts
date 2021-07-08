@@ -1,8 +1,8 @@
 import { IsString } from 'class-validator';
 
-export class GetTokensDto {
+export class GetFacebookTokensDto {
   @IsString()
-  code: string;
+  redirectUri: string;
 
   @IsString()
   clientId: string;
@@ -11,5 +11,5 @@ export class GetTokensDto {
   clientSecret: string;
 
   @IsString()
-  redirectUri: string;
+  code: string;
 }

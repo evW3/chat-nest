@@ -11,8 +11,9 @@ import { UsersService } from '../users/users.service';
 import { TokenService } from './token.service';
 import { SchemaValidate } from '../../pipes/schemaValidate';
 import { AuthSchema } from './schemas/auth.scheme';
-import { REDIRECT_URI } from '../../constants';
+import { API_URL, REDIRECT_URI } from '../../constants';
 import { SMTPService } from '../users/SMTP.service';
+import querystring from "querystring";
 
 @Controller('/auth')
 export class AuthController {
@@ -54,10 +55,10 @@ export class AuthController {
   }
 
   @Get('/google-sign-up')
-  async googleSignIn(@Req() request: Request, @Res() response: Response) {
+  async googleSignUp(@Req() request: Request, @Res() response: Response) {
     const code = request.query.code as string;
 
-    const { id_token, access_token } = await this.authService.getTokens({
+    const { id_token, access_token } = await this.authService.getGoogleTokens({
       code,
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_SECRET_CLIENT_ID,
@@ -108,5 +109,19 @@ export class AuthController {
     });
 
     response.redirect('http://localhost:3002/');
+  }
+
+  @Get('/facebook-sing-up')
+  async facebookSignUp(@Req() request: Request, @Res() response: Response) {
+    const code = request.query.code as string;
+    const { access_token } = await this.authService.getFacebookTokens({
+      code,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET_ID,
+      clientId: process.env.FACEBOOK_CLIENT_ID,
+      redirectUri: `${API_URL}/auth/facebook-sing-up`
+    });
+    const facebookUserId = (await axios.get(`https://graph.facebook.com/me?access_token=${access_token}`)).data.id;
+    const facebookUser = await axios.get(`https://graph.facebook.com/${facebookUserId}?fields=email&access_token=${access_token}`);
+
   }
 }
