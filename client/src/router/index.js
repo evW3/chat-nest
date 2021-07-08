@@ -34,10 +34,20 @@ export const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   try {
     if (to.matched.some(record => record.meta.auth)) {
-      const token = localStorage.getItem('token');
-
+      let token = localStorage.getItem('token');
       if(!token) {
-        next('/sign-in');
+        let cookieList = document.cookie.split(';');
+
+        const token = cookieList[cookieList.findIndex(cookie => {
+          return cookie.split('=')[0].trim() === 'auth-cookie';
+        })].split('=').reverse()[0];
+
+        if(!token) {
+          next('/sign-in');
+        }
+
+        localStorage.setItem('token', token);
+        next();
       }
     }
     next();

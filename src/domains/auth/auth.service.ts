@@ -15,8 +15,6 @@ export class AuthService {
       grant_type: "authorization_code",
     };
 
-    console.log(values);
-
     return axios
       .post(url, querystring.stringify(values), {
         headers: {

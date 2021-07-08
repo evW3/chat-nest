@@ -79,6 +79,8 @@ export class AuthController {
 
     const isUserAlreadyInSystem = await this.usersService.isExistsEmail(googleUser.email);
 
+    let token;
+
     if(!isUserAlreadyInSystem) {
       const tmpPassword = uuid();
       const cryptResult = await this.bcryptService.encrypt(tmpPassword);
@@ -90,17 +92,18 @@ export class AuthController {
 
       const newUserEntity = await this.usersService.saveUser(userEntity);
 
-      const token = this.tokenService.createToken(newUserEntity.id);
+      token = this.tokenService.createToken(newUserEntity.id);
 
       this.smtpService.sendMail(`U can enter with this data:\nEmail: ${userEntity.email}\nPassword: ${tmpPassword}`, 'Auth data', userEntity.email);
 
     } else {
       const userEntity = await this.usersService.getUserByEmail(googleUser.email);
+      token = this.tokenService.createToken(userEntity.id);
     }
 
-    response.cookie('authCookie', token, {
+    response.cookie('auth-cookie', token, {
       maxAge: 900000,
-      httpOnly: true,
+      httpOnly: false,
       secure: false,
     });
 
