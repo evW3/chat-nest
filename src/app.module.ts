@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { Users } from './domains/users/users.model';
 import { ChatModule } from './domains/chat/chat.module';
+import { Messages } from './domains/chat/messages.model';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { ChatModule } from './domains/chat/chat.module';
       logging: false,
       database: process.env.POSTGRES_DB,
       migrations: ["src/migration/*.js"],
-      entities: [Users],
+      entities: [Users, Messages],
       cli: {
         migrationsDir: "migration"
       }

@@ -7,20 +7,26 @@ export const router = createRouter({
     {
       path: '/',
       name: 'Home',
-      meta: { auth: true, layout: "empty"},
+      meta: { auth: true, layout: "empty" },
       component: () => import('../views/Home.vue')
     },
     {
       path: '/sign-in',
       name: 'sing-in',
-      meta: { auth: false, layout: "empty"},
+      meta: { auth: false, layout: "empty" },
       component: () => import('../views/SignIn')
     },
     {
       path: '/sign-up',
       name: 'sing-up',
-      meta: { auth: false, layout: "empty"},
+      meta: { auth: false, layout: "empty" },
       component: () => import('../views/SignUp')
+    },
+    {
+      path: '/test',
+      name: 'test',
+      meta: { auth: false, layout: "empty" },
+      component: () => import('../views/Test')
     }
   ]
 });

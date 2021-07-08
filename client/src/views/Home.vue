@@ -6,7 +6,7 @@
     </form>
     <div>
       <ul>
-        <li v-for="message in chat">{{ message }}</li>
+        <li v-for="message in chat">{{ message.text }} | {{ message.date }}</li>
       </ul>
     </div>
   </div>
@@ -15,6 +15,7 @@
 <script>
   import { mapGetters } from 'vuex';
   import { API_URL } from '../constants';
+  import SocketIO from 'socket.io-client';
 
   export default {
     name: 'Home',
@@ -25,8 +26,11 @@
     }),
     methods: {
       onSubmit() {
-        if (this.token) {
-          this.socket.emit('messageToServer', this.text);
+        if (this.user.token) {
+          this.socket.emit('chatMessage', {
+            token: this.user.token,
+            message: this.text
+          });
           this.text = '';
         } else {
           console.log('Error');
@@ -36,10 +40,10 @@
     computed: {
       ...mapGetters(['user'])
     },
-    async beforeMount() {
+    async mounted() {
       try {
         this.$store.dispatch('fetchAdmin');
-        this.socket = io(`${API_URL}`, {
+        this.socket = SocketIO(API_URL, {
           query: {
             token: this.user.token
           }
@@ -47,6 +51,10 @@
 
         this.socket.on('newMessage', msg => {
           this.chat.push(msg);
+        });
+
+        this.socket.on('error', err => {
+          this.chat.push(err);
         });
       } catch (e) {
         console.log(e);
