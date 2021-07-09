@@ -21,12 +21,6 @@ export const router = createRouter({
       name: 'sing-up',
       meta: { auth: false, layout: "empty" },
       component: () => import('../views/SignUp')
-    },
-    {
-      path: '/test',
-      name: 'test',
-      meta: { auth: false, layout: "empty" },
-      component: () => import('../views/Test')
     }
   ]
 });

@@ -7,6 +7,7 @@ import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
 import { Messages } from './messages.model';
 import { ChatGateway } from './chat.gateway';
+import { Users } from '../users/users.model';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { ChatGateway } from './chat.gateway';
       secret: process.env.TOKEN_SECRET_KEY,
       signOptions: { expiresIn: process.env.TOKEN_SECRET_EXPIRES_IN }
     }),
-    TypeOrmModule.forFeature([Messages]),
+    TypeOrmModule.forFeature([Messages, Users]),
     forwardRef(() => AuthModule),
     forwardRef(() => UsersModule),
   ],

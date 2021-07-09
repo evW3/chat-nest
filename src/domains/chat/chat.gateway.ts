@@ -16,8 +16,7 @@ import { Messages } from './messages.model';
 @Injectable()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly tokenService: TokenService,
-              private readonly usersService: UsersService,
-              @InjectRepository(Messages) private messagesRepository: Repository<Messages>) {}
+              private readonly usersService: UsersService) {}
 
   clients: any = {};
   chat: any = [];
@@ -32,14 +31,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const { id } = this.tokenService.decryptToken(token);
       if(id) {
         const message = { text: newChatMessage, date: new Date() };
-        this.chat.push({ userId: id, message });
-        this.sendNewMessageToClient(message)
+        const chatObj = { userId: id, message };
+        this.chat.push(chatObj);
+        this.sendNewMessageToClient(chatObj);
       } else {
         //Here i can exclude user without incorrect token
       }
     } else {
       //Here i can exclude user without token
     }
+  }
+
+  @SubscribeMessage('getChatHistory')
+  getChatHistory(client: any, ...args: any[]) {
+    client.emit('initChat', this.chat);
   }
 
   sendNewMessageToClient(message: any) {

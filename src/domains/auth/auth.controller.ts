@@ -12,16 +12,13 @@ import { TokenService } from './token.service';
 import { SchemaValidate } from '../../pipes/schemaValidate';
 import { AuthSchema } from './schemas/auth.scheme';
 import { API_URL, REDIRECT_URI } from '../../constants';
-import { SMTPService } from '../users/SMTP.service';
-import querystring from "querystring";
 
 @Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService,
               private readonly bcryptService: BcryptService,
               private readonly usersService: UsersService,
-              private readonly tokenService: TokenService,
-              private readonly smtpService: SMTPService) {}
+              private readonly tokenService: TokenService) {}
 
   @Post('sign-up')
   @UsePipes(new SchemaValidate(AuthSchema))
@@ -78,29 +75,7 @@ export class AuthController {
         throw new Error(error.message)
       });
 
-    const isUserAlreadyInSystem = await this.usersService.isExistsEmail(googleUser.email);
-
-    let token;
-
-    if(!isUserAlreadyInSystem) {
-      const tmpPassword = uuid();
-      const cryptResult = await this.bcryptService.encrypt(tmpPassword);
-      const userEntity = new Users();
-
-      userEntity.email = googleUser.email;
-      userEntity.password = cryptResult.encryptedPassword;
-      userEntity.password_salt = cryptResult.salt;
-
-      const newUserEntity = await this.usersService.saveUser(userEntity);
-
-      token = this.tokenService.createToken(newUserEntity.id);
-
-      this.smtpService.sendMail(`U can enter with this data:\nEmail: ${userEntity.email}\nPassword: ${tmpPassword}`, 'Auth data', userEntity.email);
-
-    } else {
-      const userEntity = await this.usersService.getUserByEmail(googleUser.email);
-      token = this.tokenService.createToken(userEntity.id);
-    }
+    const token = await this.authService.createUserIfNotAtSystem(googleUser.email);
 
     response.cookie('auth-cookie', token, {
       maxAge: 900000,
@@ -120,8 +95,15 @@ export class AuthController {
       clientId: process.env.FACEBOOK_CLIENT_ID,
       redirectUri: `${API_URL}/auth/facebook-sing-up`
     });
-    const facebookUserId = (await axios.get(`https://graph.facebook.com/me?access_token=${access_token}`)).data.id;
-    const facebookUser = await axios.get(`https://graph.facebook.com/${facebookUserId}?fields=email&access_token=${access_token}`);
+    const facebookUser = (await axios.get(`https://graph.facebook.com/me?access_token=${access_token}&fields=email`)).data;
+    const token = await this.authService.createUserIfNotAtSystem(facebookUser.email);
 
+    response.cookie('auth-cookie', token, {
+      maxAge: 900000,
+      httpOnly: false,
+      secure: false,
+    });
+
+    response.redirect('http://localhost:3002/');
   }
 }

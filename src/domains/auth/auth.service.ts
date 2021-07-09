@@ -1,12 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import * as querystring from 'querystring';
 import axios from 'axios';
+import { v4 as uuid } from 'uuid';
+
 import { GetGoogleTokensDto } from './dto/getGoogleTokens.dto';
 import { GetFacebookTokensDto } from './dto/getFacebookTokens.dto';
-import { API_URL } from '../../constants';
+import { UsersService } from '../users/users.service';
+import { BcryptService } from './bcrypt.service';
+import { TokenService } from './token.service';
+import { Users } from '../users/users.model';
+import { SMTPService } from '../users/SMTP.service';
 
 @Injectable()
 export class AuthService {
+  constructor(private readonly usersService: UsersService,
+              private readonly bcryptService: BcryptService,
+              private readonly tokenService: TokenService,
+              private readonly smtpService: SMTPService) {}
+
   getGoogleTokens(getGoogleTokensDto: GetGoogleTokensDto): Promise<GetTokensInterface> {
     const url = "https://oauth2.googleapis.com/token";
     const values = {
@@ -29,6 +40,7 @@ export class AuthService {
         throw new Error(error.message);
       });
   }
+
   getFacebookTokens(getFacebookTokensDto: GetFacebookTokensDto): Promise<GetFacebookTokensInterface> {
     const rootUrl = 'https://graph.facebook.com/oauth/access_token';
     const options = {
@@ -44,5 +56,33 @@ export class AuthService {
         console.error(`Failed to fetch auth tokens`);
         throw new Error(error.message)
       });
+  }
+  
+  async createUserIfNotAtSystem(email: string): Promise<string> {
+    const isUserAlreadyInSystem = await this.usersService.isExistsEmail(email);
+
+    let token = '';
+
+    if(!isUserAlreadyInSystem) {
+      const tmpPassword = uuid();
+      const cryptResult = await this.bcryptService.encrypt(tmpPassword);
+      const userEntity = new Users();
+
+      userEntity.email = email;
+      userEntity.password = cryptResult.encryptedPassword;
+      userEntity.password_salt = cryptResult.salt;
+
+      const newUserEntity = await this.usersService.saveUser(userEntity);
+
+      token = this.tokenService.createToken(newUserEntity.id);
+
+      this.smtpService.sendMail(`U can enter with this data:\nEmail: ${userEntity.email}\nPassword: ${tmpPassword}`, 'Auth data', userEntity.email);
+
+    } else {
+      const userEntity = await this.usersService.getUserByEmail(email);
+      token = this.tokenService.createToken(userEntity.id);
+    }
+
+    return token;
   }
 }

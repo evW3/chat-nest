@@ -6,7 +6,7 @@
     </form>
     <div>
       <ul>
-        <li v-for="message in chat">{{ message.text }} | {{ message.date }}</li>
+        <li v-for="chatObj in chat">{{ chatObj.message.text }} | {{ chatObj.message.date }}</li>
       </ul>
     </div>
   </div>
@@ -48,14 +48,21 @@
             token: this.user.token
           }
         });
+        if(this.socket) {
+          this.socket.on('newMessage', msg => {
+            this.chat.push(msg);
+          });
 
-        this.socket.on('newMessage', msg => {
-          this.chat.push(msg);
-        });
+          this.socket.on('initChat', chatHistory => {
+            this.chat = chatHistory;
+          });
 
-        this.socket.on('error', err => {
-          this.chat.push(err);
-        });
+          this.socket.on('error', err => {
+            this.chat.push(err);
+          });
+
+          this.socket.emit('getChatHistory');
+        }
       } catch (e) {
         console.log(e);
       }
