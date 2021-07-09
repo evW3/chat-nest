@@ -11,16 +11,23 @@ import {v4 as uuid} from 'uuid';
 import { TokenService } from '../auth/token.service';
 import { UsersService } from '../users/users.service';
 import { Messages } from './messages.model';
+import { MessagesService } from './messages.service';
+import { Users } from '../users/users.model';
 
 @WebSocketGateway()
 @Injectable()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private readonly tokenService: TokenService,
-              private readonly usersService: UsersService) {}
+  constructor(private readonly tokenService: TokenService, private readonly usersService: UsersService, private readonly messagesService: MessagesService) {
+    (async () => {this.chat = await this.messagesService.getMessages()})();
+
+    setInterval(async () => {
+      await this.saveChat();
+    }, Number.parseInt(process.env.CHAT_SAVE_DELAY));
+  }
 
   clients: any = {};
-  chat: any = [];
-  lastMessageId: number;
+  chat: Messages[] = [];
+  lastMessageId: number = 0;
 
   @SubscribeMessage('chatMessage')
   async message(client: any, ...args: any[]): Promise<void> {
@@ -30,10 +37,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if(token && newChatMessage) {
       const { id } = this.tokenService.decryptToken(token);
       if(id) {
-        const message = { text: newChatMessage, date: new Date() };
-        const chatObj = { userId: id, message };
-        this.chat.push(chatObj);
-        this.sendNewMessageToClient(chatObj);
+        const user = new Users();
+        const message = new Messages();
+
+        user.id = id;
+
+        message.date = new Date();
+        message.message = newChatMessage;
+        message.user = user;
+
+        this.chat.push(message);
+        this.sendNewMessageToClient(message);
       } else {
         //Here i can exclude user without incorrect token
       }
@@ -64,6 +78,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
     } catch (e) {}
+  }
+
+  async saveChat() {
+    let tmpChat = [];
+    if(this.lastMessageId - this.chat.length) {
+      for(let i = this.lastMessageId; i < this.chat.length; i++) {
+        tmpChat.push(this.chat[i]);
+      }
+      this.lastMessageId = this.chat.length;
+      await this.messagesService.bulkInsertMessages(tmpChat);
+    }
   }
 
   handleDisconnect(client: any): any {

@@ -8,6 +8,7 @@ import { UsersModule } from '../users/users.module';
 import { Messages } from './messages.model';
 import { ChatGateway } from './chat.gateway';
 import { Users } from '../users/users.model';
+import { MessagesService } from './messages.service';
 
 @Module({
   imports: [
@@ -22,6 +23,6 @@ import { Users } from '../users/users.model';
     forwardRef(() => AuthModule),
     forwardRef(() => UsersModule),
   ],
-  providers: [ChatGateway]
+  providers: [ChatGateway, MessagesService]
 })
 export class ChatModule {}

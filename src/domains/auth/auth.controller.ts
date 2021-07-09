@@ -11,7 +11,7 @@ import { UsersService } from '../users/users.service';
 import { TokenService } from './token.service';
 import { SchemaValidate } from '../../pipes/schemaValidate';
 import { AuthSchema } from './schemas/auth.scheme';
-import { API_URL, REDIRECT_URI } from '../../constants';
+import { API_URL, REDIRECT_TO_FRONT, REDIRECT_URI } from '../../constants';
 
 @Controller('/auth')
 export class AuthController {
@@ -83,7 +83,7 @@ export class AuthController {
       secure: false,
     });
 
-    response.redirect('http://localhost:3002/');
+    response.redirect(REDIRECT_TO_FRONT());
   }
 
   @Get('/facebook-sing-up')
@@ -104,6 +104,6 @@ export class AuthController {
       secure: false,
     });
 
-    response.redirect('http://localhost:3002/');
+    response.redirect(REDIRECT_TO_FRONT());
   }
 }

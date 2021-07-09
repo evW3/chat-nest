@@ -6,7 +6,7 @@
     </form>
     <div>
       <ul>
-        <li v-for="chatObj in chat">{{ chatObj.message.text }} | {{ chatObj.message.date }}</li>
+        <li v-for="message in chat">{{ message.message }} | {{ message.date }}</li>
       </ul>
     </div>
   </div>
