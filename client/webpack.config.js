@@ -31,7 +31,7 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     host: 'localhost',
-    port: 3002,
+    port: 8080,
     hot: isDev,
     liveReload: isDev,
     open: isDev,
