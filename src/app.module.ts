@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { Users } from './domains/users/users.model';
 import { ChatModule } from './domains/chat/chat.module';
 import { Messages } from './domains/chat/messages.model';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { Messages } from './domains/chat/messages.model';
         migrationsDir: "migration"
       }
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     UsersModule,
     ChatModule

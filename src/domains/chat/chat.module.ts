@@ -9,6 +9,7 @@ import { Messages } from './messages.model';
 import { ChatGateway } from './chat.gateway';
 import { Users } from '../users/users.model';
 import { MessagesService } from './messages.service';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [

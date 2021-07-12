@@ -13,6 +13,7 @@ import { UsersService } from '../users/users.service';
 import { Messages } from './messages.model';
 import { MessagesService } from './messages.service';
 import { Users } from '../users/users.model';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @WebSocketGateway()
 @Injectable()
@@ -20,9 +21,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly tokenService: TokenService, private readonly usersService: UsersService, private readonly messagesService: MessagesService) {
     (async () => {this.chat = await this.messagesService.getMessages()})();
 
-    setInterval(async () => {
-      await this.saveChat();
-    }, Number.parseInt(process.env.CHAT_SAVE_DELAY));
   }
 
   clients: any = {};
@@ -80,6 +78,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } catch (e) {}
   }
 
+  @Cron(process.env.CHAT_SAVE_DELAY)
   async saveChat() {
     let tmpChat = [];
     if(this.lastMessageId - this.chat.length) {
