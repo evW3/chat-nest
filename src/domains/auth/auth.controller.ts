@@ -20,7 +20,7 @@ export class AuthController {
               private readonly usersService: UsersService,
               private readonly tokenService: TokenService) {}
 
-  @Post('sign-up')
+  @Post('/sign-up')
   @UsePipes(new SchemaValidate(AuthSchema))
   async signUp(@Body() userDto: AuthDto) {
     const cryptResult = await this.bcryptService.encrypt(userDto.password);

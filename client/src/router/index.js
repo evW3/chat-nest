@@ -30,18 +30,19 @@ router.beforeEach(async (to, from, next) => {
     if (to.matched.some(record => record.meta.auth)) {
       let token = localStorage.getItem('token');
       if(!token) {
-        let cookieList = document.cookie.split(';');
+        let cookieList = document?.cookie?.split(';');
+        if(cookieList) {
+          const token = cookieList[cookieList.findIndex(cookie => {
+            return cookie?.split('=')[0]?.trim() === 'auth-cookie';
+          })]?.split('=')?.reverse()[0];
 
-        const token = cookieList[cookieList.findIndex(cookie => {
-          return cookie.split('=')[0].trim() === 'auth-cookie';
-        })].split('=').reverse()[0];
-
+        }
         if(!token) {
           next('/sign-in');
+        } else {
+          localStorage.setItem('token', token);
+          next();
         }
-
-        localStorage.setItem('token', token);
-        next();
       }
     }
     next();

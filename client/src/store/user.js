@@ -12,10 +12,8 @@ export default {
   actions: {
     async signIn({ commit }, authDto) {
       try {
-        console.log(authDto);
         const token = (await post(`${ API_URL }/auth/sign-in`, authDto)).data.token;
         localStorage.setItem('token', token);
-        console.log(token);
         commit('setUserToken', token);
       } catch (e) {
         await commit('setUserToken', null);
@@ -29,6 +27,17 @@ export default {
         commit('setUserToken', token);
       } catch (e) {
         console.log(e);
+      }
+    },
+
+    async signUp({ commit }, regDto) {
+      try {
+        const token = (await post(`${ API_URL }/auth/sign-up`, regDto)).data.token;
+        localStorage.setItem('token', token);
+        commit('setUserToken', token);
+      } catch (e) {
+        await commit('setUserToken', null);
+        console.log(`[VUEX ERROR]: fetchAdmin [${ e }]`);
       }
     }
   }

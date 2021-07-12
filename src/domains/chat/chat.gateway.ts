@@ -79,7 +79,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @Cron(process.env.CHAT_SAVE_DELAY)
-  async saveChat() {
+  async saveChat() {    
     let tmpChat = [];
     if(this.lastMessageId - this.chat.length) {
       for(let i = this.lastMessageId; i < this.chat.length; i++) {
